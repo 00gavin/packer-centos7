@@ -1,0 +1,50 @@
+{
+    "variables": {
+    },
+    "builders": [{
+        "type": "virtualbox-iso",
+        "guest_os_type": "RedHat_64",
+        "iso_url": "CentOS-7.0-1406-x86_64-Minimal.iso",
+        "iso_checksum": "e3afe3f1121d69c40cc23f0bafa05e5d",
+        "iso_checksum_type": "md5",
+        "ssh_username": "vagrant",
+        "ssh_password": "vagrant",
+        "ssh_wait_timeout": "600s",
+        "vm_name": "centos70",
+        "http_directory": "./",
+        "boot_wait": "10s",
+        "boot_command": [
+            "<esc><wait>",
+            "linux ks=http://{{.HTTPIP}}:{{.HTTPPort}}/ks.cfg",
+            "<enter><wait>"
+        ],
+        "shutdown_command": "echo 'vagrant' |sudo -S shutdown -P now",
+        "vboxmanage": [
+            ["modifyvm", "{{.Name}}", "--memory", "512"],
+            ["modifyvm", "{{.Name}}", "--usb", "off"],
+            ["modifyvm", "{{.Name}}", "--audio", "none"]
+        ]
+    }],
+    "provisioners": [{
+        "type": "shell",
+        "inline": [
+            "sudo yum -y install http://download.fedoraproject.org/pub/epel/beta/7/x86_64/epel-release-7-0.2.noarch.rpm",
+            "sudo yum -y install gcc make bzip2 kernel-headers kernel-devel dkms",
+            "sudo yum clean all",
+            "sudo mount -o loop /home/vagrant/VBoxGuestAdditions.iso /mnt",
+            "sudo sh /mnt/VBoxLinuxAdditions.run",
+            "sudo umount /mnt",
+            "sudo /etc/rc.d/init.d/vboxadd setup",
+            "sudo rm -f /home/vagrant/VBoxGuestAdditions.iso",
+            "sudo dd if=/dev/zero of=/boot/zero bs=1M",
+            "sudo rm -f /boot/zero",
+            "sudo dd if=/dev/zero of=/zero bs=1M",
+            "sudo rm -f /zero"
+        ]
+    }],
+    "post-processors": [{
+        "type": "vagrant",
+        "output": "./centos-70-x64-{{.Provider}}-minimal.box",
+        "vagrantfile_template": "./Vagrantfile"
+    }]
+}
