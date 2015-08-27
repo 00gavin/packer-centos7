@@ -12,7 +12,8 @@ Getting started...
 Build it...
 
 ```
-$ packer build centos7.json
+$ cd packer-centos7
+$ packer build centos71.json
 ```
 
 Test it out...
